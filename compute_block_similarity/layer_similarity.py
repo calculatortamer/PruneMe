@@ -68,7 +68,9 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
 
 
     for batch in tqdm(dataloader, desc="Processing batches"):
-        inputs = tokenizer(batch, return_tensors=return_tensors, padding="longest", max_length=max_length, truncation=True).to(device)
+        inputs = tokenizer(batch, return_tensors=return_tensors, padding="longest", max_length=max_length, truncation=True)
+        if(return_tensors=="pt"):
+            inputs=inputs.to(device)
         with torch.no_grad():
             outputs = model(**inputs)
         attention_mask = inputs["attention_mask"]
