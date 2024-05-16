@@ -33,12 +33,13 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
                                             bnb_4bit_quant_type="nf4",
                                             bnb_4bit_compute_dtype=torch.bfloat16)
        
-
+    return_tensors="pt"
     if(device=="xla"):
         #google colab tpu stuff
         import torch_xla
         import torch_xla.core.xla_model as xm
         device=xm.xla_device()
+        return_tensors="tf"
     
     model = AutoModelForCausalLM.from_pretrained(model_path,  
                                                  device_map="auto", 
@@ -67,7 +68,7 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
 
 
     for batch in tqdm(dataloader, desc="Processing batches"):
-        inputs = tokenizer(batch, return_tensors="pt", padding="longest", max_length=max_length, truncation=True).to(device)
+        inputs = tokenizer(batch, return_tensors=return_tensors, padding="longest", max_length=max_length, truncation=True).to(device)
         with torch.no_grad():
             outputs = model(**inputs)
         attention_mask = inputs["attention_mask"]
