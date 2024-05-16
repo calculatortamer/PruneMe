@@ -36,6 +36,7 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
         #google colab tpu stuff
         import torch_xla
         import torch_xla.core.xla_model as xm
+        import torch_xla.distributed.parallel_loader as pl
         device=xm.xla_device()
     
     model = AutoModelForCausalLM.from_pretrained(model_path,  
@@ -54,7 +55,10 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     if dataset_size:
         dataset = dataset.select(range(dataset_size))
 
+    
     dataloader = DataLoader(dataset[dataset_column], batch_size=batch_size, shuffle=False, drop_last=True)
+    if(device!="xla"):
+        dataloader = pl.MpDeviceLoader(dataloader, device)
 
     # Initialize a list to store distances for each block across the dataset
     all_distances = [[] for _ in range(model.config.num_hidden_layers - layers_to_skip)]
