@@ -25,7 +25,7 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     if(device==None):
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
-
+    quantization_config=None
     if(device=="cuda"):
         # if resource is a problem
        quantization_config = BitsAndBytesConfig(load_in_4bit=True,
