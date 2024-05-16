@@ -43,6 +43,7 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     if(device=="xla"):
         #google colab tpu stuff
         device=xm.xla_device()
+        torch.set_default_device(device)
         return_tensors="tf"
     
     model = AutoModelForCausalLM.from_pretrained(model_path,  
