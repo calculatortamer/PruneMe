@@ -20,12 +20,15 @@ np.random.seed(42)
 
 
 def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, max_length: int,
-         layers_to_skip: int, dataset_size: Optional[int] = None, dataset_subset: Optional[str] = "eval"):
+         layers_to_skip: int, device: Optional[str], dataset_size: Optional[int] = None, dataset_subset: Optional[str] = "eval"):
     
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    if(device==None):
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    # if resource is a problem
-    quantization_config = BitsAndBytesConfig(load_in_4bit=True,
+
+    if(device=="cuda"):
+        # if resource is a problem
+       quantization_config = BitsAndBytesConfig(load_in_4bit=True,
                                             bnb_4bit_use_double_quant=True,
                                             bnb_4bit_quant_type="nf4",
                                             bnb_4bit_compute_dtype=torch.bfloat16)
@@ -117,4 +120,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.model_path, args.dataset, args.dataset_column, args.batch_size,
-         args.max_length, args.layers_to_skip, args.dataset_size, args.dataset_subset)
+         args.max_length, args.layers_to_skip, args.device, args.dataset_size, args.dataset_subset)
