@@ -49,7 +49,7 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     model = AutoModelForCausalLM.from_pretrained(model_path,  
                                                  device_map=device_map, 
                                                  quantization_config=quantization_config, 
-                                                 output_hidden_states=True).to(device)
+                                                 output_hidden_states=True)
     
     tokenizer = AutoTokenizer.from_pretrained(model_path)
 
