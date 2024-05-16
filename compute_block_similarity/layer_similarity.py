@@ -32,6 +32,11 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
                                             bnb_4bit_use_double_quant=True,
                                             bnb_4bit_quant_type="nf4",
                                             bnb_4bit_compute_dtype=torch.bfloat16)
+    if(device=="xla"):
+        #google colab tpu stuff
+        import torch_xla
+        import torch_xla.core.xla_model as xm
+        device=xm.xla_device()
     
     model = AutoModelForCausalLM.from_pretrained(model_path,  
                                                  device_map="auto", 
@@ -115,7 +120,7 @@ if __name__ == "__main__":
     parser.add_argument("--layers_to_skip", type=int, required=True, help="Number of layers to skip.")
     parser.add_argument("--dataset_size", type=int, help="Optional argument to specify the size of the dataset.")
     parser.add_argument("--dataset_subset", type=str, default="eval", help="Subset of the dataset to use (e.g., 'train', 'eval').")
-    parser.add_argument("--device", type=str, help="Device to run the model on ('cpu', 'cuda').")
+    parser.add_argument("--device", type=str, help="Device to run the model on ('cpu', 'cuda', 'xla').")
 
     args = parser.parse_args()
 
