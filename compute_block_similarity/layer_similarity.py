@@ -5,6 +5,12 @@ import numpy as np
 from tqdm import tqdm
 
 import torch
+try:
+    import torch_xla
+    import torch_xla.core.xla_model as xm
+    import torch_xla.distributed.parallel_loader as pl
+except:
+    None
 from torch.utils.data import DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import datasets
@@ -36,8 +42,6 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     return_tensors="pt"
     if(device=="xla"):
         #google colab tpu stuff
-        import torch_xla
-        import torch_xla.core.xla_model as xm
         device=xm.xla_device()
         return_tensors="tf"
     
@@ -60,7 +64,6 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     
     dataloader = DataLoader(dataset[dataset_column], batch_size=batch_size, shuffle=False, drop_last=True)
     if(device=="xla"):
-        import torch_xla.distributed.parallel_loader as pl
         dataloader = pl.MpDeviceLoader(dataloader, device)
 
     # Initialize a list to store distances for each block across the dataset
