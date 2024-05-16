@@ -42,7 +42,7 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     return_tensors="pt"
     if(device=="xla"):
         #google colab tpu stuff
-        device=xm.xla_device()
+        device=xm.xla_device(devkind="TPU")
         return_tensors="tf"
         device_map=None
     
