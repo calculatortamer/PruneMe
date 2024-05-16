@@ -46,6 +46,8 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
         torch.set_default_device(device)
         return_tensors="pt"
         device_map=None
+        initialdevice="xla"
+        
     
     model = AutoModelForCausalLM.from_pretrained(model_path,  
                                                  device_map=device_map, 
@@ -65,7 +67,7 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
 
     
     dataloader = DataLoader(dataset[dataset_column], batch_size=batch_size, shuffle=False, drop_last=True)
-    if(device=="xla"):
+    if(initialdevice=="xla"): #TODO find better way
         dataloader = pl.MpDeviceLoader(dataloader, device)
 
     # Initialize a list to store distances for each block across the dataset
