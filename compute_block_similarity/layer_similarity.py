@@ -51,8 +51,8 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     
     if(unsloth!=0):
         #try that less vram thingy
-        model=FastLanguageModel.get_peft_model(model, use_gradient_checkpointing = "unsloth")
-
+        #model=FastLanguageModel.get_peft_model(model, use_gradient_checkpointing = "unsloth")
+        None
 
 
     tokenizer = AutoTokenizer.from_pretrained(model_path)
