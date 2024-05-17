@@ -9,6 +9,12 @@ from torch.utils.data import DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import datasets
 
+try:
+    from unsloth import FastLanguageModel
+except:
+    #optional dependencies, do nothing
+    None
+
 from utils import get_last_non_padded_tokens, compute_block_distances
 from typing import Optional
 
@@ -20,7 +26,7 @@ np.random.seed(42)
 
 
 def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, max_length: int,
-         layers_to_skip: int, device: Optional[str], dataset_size: Optional[int] = None, dataset_subset: Optional[str] = "eval"):
+         layers_to_skip: int, device: Optional[str], dataset_size: Optional[int] = None, dataset_subset: Optional[str] = "eval", unsloth: Optional[int] = 0):
     
     if(device==None):
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -32,12 +38,21 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
                                             bnb_4bit_use_double_quant=True,
                                             bnb_4bit_quant_type="nf4",
                                             bnb_4bit_compute_dtype=torch.bfloat16)
-    
-    model = AutoModelForCausalLM.from_pretrained(model_path,  
+    modelloader=AutoModelForCausalLM
+    if(unsloth!=0):
+        modelloader=FastLanguageModel
+
+    model = modelloader.from_pretrained(model_path,  
                                                  device_map="auto", 
                                                  quantization_config=quantization_config, 
                                                  output_hidden_states=True)
     
+    if(unsloth!=0):
+        #try that less vram thingy
+        model=FastLanguageModel.get_peft_model(model, use_gradient_checkpointing = "unsloth")
+
+
+
     tokenizer = AutoTokenizer.from_pretrained(model_path)
 
     if not tokenizer.pad_token:
@@ -116,8 +131,10 @@ if __name__ == "__main__":
     parser.add_argument("--dataset_size", type=int, help="Optional argument to specify the size of the dataset.")
     parser.add_argument("--dataset_subset", type=str, default="eval", help="Subset of the dataset to use (e.g., 'train', 'eval').")
     parser.add_argument("--device", type=str, help="Device to run the model on ('cpu', 'cuda').")
+    parser.add_argument("--unsloth", type=int, default=0, help="Use unsloth (0 by default, 1 to enable).")
+    
 
     args = parser.parse_args()
 
     main(args.model_path, args.dataset, args.dataset_column, args.batch_size,
-         args.max_length, args.layers_to_skip, args.device, args.dataset_size, args.dataset_subset)
+         args.max_length, args.layers_to_skip, args.device, args.dataset_size, args.dataset_subset, args.unsloth)
