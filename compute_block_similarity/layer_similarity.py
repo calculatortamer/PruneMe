@@ -41,10 +41,12 @@ def main(model_path: str, dataset: str, dataset_column: str, batch_size: int, ma
     modelloader=AutoModelForCausalLM
     if(unsloth!=0):
         modelloader=FastLanguageModel
+        quantization_config = None
 
     model = modelloader.from_pretrained(model_path,  
                                                  device_map="auto", 
-                                                 quantization_config=quantization_config, 
+                                                 #quantization_config=quantization_config, 
+                                                 load_in_4bit=True,
                                                  output_hidden_states=True)
     
     if(unsloth!=0):
